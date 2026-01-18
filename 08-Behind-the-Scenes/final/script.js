@@ -3,7 +3,7 @@
 ///////////////////////////////////////
 // Scoping in Practice
 
-/*
+/* 
 function calcAge(birthYear) {
   const age = 2037 - birthYear;
 
@@ -221,3 +221,11 @@ jessicaClone.familiy.push('John');
 console.log('Original:', jessica);
 console.log('Clone:', jessicaClone);
 */
+
+const f = () => {
+  var a = 1;
+  console.log(this);
+};
+
+f();
+console.log(window.a);
