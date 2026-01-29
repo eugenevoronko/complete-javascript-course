@@ -75,10 +75,63 @@ function displayMovements(movements) {
   });
 }
 
-displayMovements(account1.movements);
+function calcDisplayBalance(movements) {
+  labelBalance.textContent = `${movements.reduce((acc, mov) => acc + mov, 0)}€`;
+}
 
-/////////////////////////////////////////////////
-/////////////////////////////////////////////////
+function calcDisplaySummary(account) {
+  const sumIn = account.movements
+    .filter(mov => mov > 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  labelSumIn.textContent = `${sumIn}€`;
+
+  const sumOut = account.movements
+    .filter(mov => mov < 0)
+    .reduce((acc, mov) => acc + mov, 0);
+  labelSumOut.textContent = `${Math.abs(sumOut)}€`;
+
+  const sumInterest = account.movements
+    .filter(mov => mov > 0)
+    .map(deposit => (deposit * account.interestRate) / 100)
+    .filter(interest => interest >= 1)
+    .reduce((acc, interest) => acc + interest, 0);
+  labelSumInterest.textContent = `${sumInterest}€`;
+}
+
+function createUsernames(accounts) {
+  accounts.forEach(account => {
+    account.username = account.owner
+      .toLowerCase()
+      .split(' ')
+      .map(word => word[0])
+      .join('');
+  });
+}
+createUsernames(accounts);
+
+let currentAccount;
+
+btnLogin.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  currentAccount = accounts.find(
+    acc => acc.username === inputLoginUsername.value,
+  );
+
+  if (currentAccount?.pin === Number(inputLoginPin.value)) {
+    labelWelcome.textContent = `Welcome back, ${
+      currentAccount.owner.split(' ')[0]
+    }`;
+    containerApp.style.opacity = 1;
+    inputLoginUsername.value = inputLoginPin.value = '';
+    inputLoginPin.blur();
+    displayMovements(currentAccount.movements);
+    calcDisplayBalance(currentAccount.movements);
+    calcDisplaySummary(currentAccount);
+  }
+});
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // LECTURES
 
 const currencies = new Map([
@@ -89,6 +142,31 @@ const currencies = new Map([
 
 const movements = [200, 450, -400, 3000, -650, -130, 70, 1300];
 
+const deposits = movements.filter(movement => movement > 0);
+const withdrawals = movements.filter(movement => movement < 0);
+const balance = movements.reduce((acc, cur, index) => {
+  console.log(`Index: ${index} Accum: ${acc}`);
+  return acc + cur;
+}, 0);
+console.log(balance);
+
+const events = [
+  { type: 'ADD_ITEM', item: 'apple' },
+  { type: 'ADD_ITEM', item: 'banana' },
+  { type: 'REMOVE_ITEM', item: 'apple' },
+];
+
+const cart = events.reduce((state, event) => {
+  switch (event.type) {
+    case 'ADD_ITEM':
+      return [...state, event.item];
+    case 'REMOVE_ITEM':
+      return state.filter(item => item !== event.item);
+    default:
+      return state;
+  }
+}, []);
+console.log(cart);
 ///////////////////////////////////////
 // Coding Challenge #1
 
@@ -152,6 +230,16 @@ TEST DATA 2: [16, 6, 10, 5, 6, 1, 4]
 GOOD LUCK 😀
 */
 
+function calcAverageHumanAge(ages) {
+  const humanAges = ages.map(age => (age <= 2 ? 2 * age : 16 + age * 4));
+  const adults = humanAges.filter(age => age >= 18);
+  return adults.length > 0
+    ? adults.reduce((acc, age) => acc + age, 0) / adults.length
+    : 0;
+}
+console.log(calcAverageHumanAge([5, 2, 4, 1, 15, 8, 3]));
+console.log(calcAverageHumanAge([16, 6, 10, 5, 6, 1, 4]));
+
 ///////////////////////////////////////
 // Coding Challenge #3
 
@@ -163,7 +251,22 @@ TEST DATA 2: [16, 6, 10, 5, 6, 1, 4]
 
 GOOD LUCK 😀
 */
+let account = {};
+for (const acc of accounts) {
+  if (acc.owner === 'Jessica Davis') {
+    account = acc;
+    break;
+  }
+}
+console.log(account);
 
+const calcAverageHumanAgeArrow = ages =>
+  ages
+    .map(age => (age <= 2 ? 2 * age : 16 + age * 4))
+    .filter(age => age >= 18)
+    .reduce((acc, age, i, arr) => acc + age / arr.length, 0);
+console.log(calcAverageHumanAgeArrow([5, 2, 4, 1, 15, 8, 3]));
+console.log(calcAverageHumanAgeArrow([16, 6, 10, 5, 6, 1, 4]));
 /*
 This time, Julia and Kate are studying the activity levels of different dog breeds.
 
