@@ -61,10 +61,12 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
-function displayMovements(movements) {
+function displayMovements(movements, sort = false) {
   containerMovements.innerHTML = '';
 
-  movements.forEach(function (movement, index) {
+  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+
+  movs.forEach(function (movement, index) {
     const movementType = movement > 0 ? 'deposit' : 'withdrawal';
     const html = `<div class="movements__row">
           <div class="movements__type movements__type--${movementType}">${index + 1} ${movementType}</div>
@@ -75,8 +77,9 @@ function displayMovements(movements) {
   });
 }
 
-function calcDisplayBalance(movements) {
-  labelBalance.textContent = `${movements.reduce((acc, mov) => acc + mov, 0)}€`;
+function calcDisplayBalance(account) {
+  account.balance = account.movements.reduce((acc, mov) => acc + mov, 0);
+  labelBalance.textContent = `${account.balance}€`;
 }
 
 function calcDisplaySummary(account) {
@@ -109,6 +112,12 @@ function createUsernames(accounts) {
 }
 createUsernames(accounts);
 
+function updateUI(account) {
+  displayMovements(account.movements);
+  calcDisplayBalance(account);
+  calcDisplaySummary(account);
+}
+
 let currentAccount;
 
 btnLogin.addEventListener('click', function (e) {
@@ -125,13 +134,72 @@ btnLogin.addEventListener('click', function (e) {
     containerApp.style.opacity = 1;
     inputLoginUsername.value = inputLoginPin.value = '';
     inputLoginPin.blur();
-    displayMovements(currentAccount.movements);
-    calcDisplayBalance(currentAccount.movements);
-    calcDisplaySummary(currentAccount);
   }
+
+  updateUI(currentAccount);
 });
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+btnTransfer.addEventListener('click', function (e) {
+  e.preventDefault();
+
+  const amount = Number(inputTransferAmount.value);
+  const receiverAcc = accounts.find(
+    acc => acc.username === inputTransferTo.value,
+  );
+
+  if (
+    amount > 0 &&
+    receiverAcc &&
+    currentAccount.balance >= amount &&
+    receiverAcc?.username !== currentAccount.username
+  ) {
+    currentAccount.movements.push(-amount);
+    receiverAcc.movements.push(amount);
+    updateUI(currentAccount);
+  }
+
+  inputTransferAmount.value = inputTransferTo.value = '';
+});
+
+btnClose.addEventListener('click', function (e) {
+  e.preventDefault();
+  if (
+    inputCloseUsername.value === currentAccount.username &&
+    Number(inputClosePin.value) === currentAccount.pin
+  ) {
+    const index = accounts.findIndex(
+      acc => acc.username === currentAccount.username,
+    );
+    accounts.splice(index, 1);
+    containerApp.style.opacity = 0;
+    labelWelcome.textContent = 'Log in to get started';
+  }
+
+  inputCloseUsername.value = inputClosePin.value = '';
+});
+
+btnLoan.addEventListener('click', function (e) {
+  e.preventDefault();
+  const amount = Number(inputLoanAmount.value);
+
+  if (
+    amount > 0 &&
+    currentAccount.movements.some(movement => movement >= amount * 0.1)
+  ) {
+    currentAccount.movements.push(amount);
+    updateUI(currentAccount);
+  }
+
+  inputLoanAmount.value = '';
+});
+
+let sort = false;
+btnSort.addEventListener('click', function (e) {
+  displayMovements(currentAccount.movements, !sort);
+  sort = !sort;
+  btnSort.textContent = btnSort.textContent === '↓ SORT' ? '↑ SORT' : '↓ SORT';
+});
+
 // LECTURES
 
 const currencies = new Map([
@@ -167,6 +235,21 @@ const cart = events.reduce((state, event) => {
   }
 }, []);
 console.log(cart);
+
+const lastLargeMovement = movements.findLastIndex(mov => Math.abs(mov) >= 1000);
+console.log(
+  `Latest Large Movement was ${movements.length - lastLargeMovement} movement(s) ago.`,
+);
+
+const arr = [[1, 2, 3], [4, [5, 6, ['abs', 99]]], 7, 8];
+console.log(arr.flat(2));
+
+const randomRolls = Array.from(
+  { length: 100 },
+  (_, i) => Math.floor(Math.random() * 6) + 1,
+);
+console.log(randomRolls);
+
 ///////////////////////////////////////
 // Coding Challenge #1
 
@@ -267,6 +350,9 @@ const calcAverageHumanAgeArrow = ages =>
     .reduce((acc, age, i, arr) => acc + age / arr.length, 0);
 console.log(calcAverageHumanAgeArrow([5, 2, 4, 1, 15, 8, 3]));
 console.log(calcAverageHumanAgeArrow([16, 6, 10, 5, 6, 1, 4]));
+
+///////////////////////////////////////
+// Coding Challenge #4
 /*
 This time, Julia and Kate are studying the activity levels of different dog breeds.
 
@@ -321,6 +407,51 @@ const breeds = [
   },
 ];
 
+// 1.
+const huskyWeight = breeds.find(dog => dog.breed === 'Husky').averageWeight;
+console.log(huskyWeight);
+
+// 2.
+const dogBothActivities = breeds.find(
+  dog => dog.activities.includes('running') && dog.activities.includes('fetch'),
+).breed;
+console.log(dogBothActivities);
+
+// 3.
+const allActivities = breeds.flatMap(dog => dog.activities);
+console.log(allActivities);
+
+// 4.
+const uniqueActivities = [...new Set(allActivities)];
+console.log(uniqueActivities);
+
+// 5.
+const swimmingAdjacent = [
+  ...new Set(
+    breeds
+      .filter(dog => dog.activities.includes('swimming'))
+      .flatMap(dog =>
+        dog.activities.filter(activity => activity !== 'swimming'),
+      ),
+  ),
+];
+console.log(swimmingAdjacent);
+
+// 6.
+console.log(breeds.every(dog => dog.averageWeight >= 10));
+
+// 7.
+console.log(breeds.some(dog => dog.activities.length >= 3));
+
+// BONUS
+console.log(
+  Math.max(
+    ...breeds
+      .filter(dog => dog.activities.includes('fetch'))
+      .map(dog => dog.averageWeight),
+  ),
+);
+
 ///////////////////////////////////////
 // Coding Challenge #5
 
@@ -358,6 +489,8 @@ const dogs = [
 GOOD LUCK 😀
 */
 
+console.log('--- Coding Challenge #5 ---');
+
 const dogs = [
   { weight: 22, curFood: 250, owners: ['Alice', 'Bob'] },
   { weight: 8, curFood: 200, owners: ['Matilda'] },
@@ -365,3 +498,24 @@ const dogs = [
   { weight: 18, curFood: 244, owners: ['Joe'] },
   { weight: 32, curFood: 340, owners: ['Michael'] },
 ];
+
+function recommendedFood(weight) {
+  return Math.round(weight ** 0.75 * 28);
+}
+
+function foodInRange(recFood, curFood) {
+  return curFood > recFood * 0.9 && curFood < recFood * 1.1;
+}
+
+// 1.
+dogs.forEach(dog => {
+  dog.recFood = recommendedFood(dog.weight);
+});
+console.log('#1', dogs);
+
+// 2.
+const {recFood, curFood} = dogs.find(dog => dog.owners.includes('Sarah'));
+console.log('#2', foodInRange(recFood, curFood));
+
+// 3.
+const ownersTooMuch = dogs
