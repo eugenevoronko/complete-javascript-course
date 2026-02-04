@@ -477,15 +477,6 @@ YOUR TASKS:
 HINT 1: Use many different tools to solve these challenges, you can use the summary lecture to choose between them 😉
 HINT 2: Being within a range 10% above and below the recommended portion means: current > (recommended * 0.90) && current < (recommended * 1.10). Basically, the current portion should be between 90% and 110% of the recommended portion.
 
-TEST DATA:
-const dogs = [
-  { weight: 22, curFood: 250, owners: ['Alice', 'Bob'] },
-  { weight: 8, curFood: 200, owners: ['Matilda'] },
-  { weight: 13, curFood: 275, owners: ['Sarah', 'John', 'Leo'] },
-  { weight: 18, curFood: 244, owners: ['Joe'] },
-  { weight: 32, curFood: 340, owners: ['Michael'] },
-];
-
 GOOD LUCK 😀
 */
 
@@ -500,7 +491,7 @@ const dogs = [
 ];
 
 function recommendedFood(weight) {
-  return Math.round(weight ** 0.75 * 28);
+  return Math.trunc(weight ** 0.75 * 28);
 }
 
 function foodInRange(recFood, curFood) {
@@ -514,8 +505,62 @@ dogs.forEach(dog => {
 console.log('#1', dogs);
 
 // 2.
-const {recFood, curFood} = dogs.find(dog => dog.owners.includes('Sarah'));
+const { recFood, curFood } = dogs.find(dog => dog.owners.includes('Sarah'));
 console.log('#2', foodInRange(recFood, curFood));
 
-// 3.
+// 3. 4.
 const ownersTooMuch = dogs
+  .filter(dog => dog.curFood > dog.recFood)
+  .flatMap(dog => dog.owners);
+const ownersTooLittle = dogs
+  .filter(dog => dog.curFood < dog.recFood)
+  .flatMap(dog => dog.owners);
+console.log(
+  '#3 and #4',
+  `${ownersTooMuch.join(' and ')}'s dogs eat too much!`,
+  `${ownersTooLittle.join(' and ')}'s dogs eat too little!`,
+);
+
+// 5.
+console.log(
+  '#5',
+  dogs.some(dog => dog.curFood === dog.recFood),
+);
+
+// 6.
+console.log(
+  '#6',
+  dogs.every(({ recFood, curFood }) => foodInRange(recFood, curFood)),
+);
+
+// 7.
+console.log(
+  '#7',
+  dogs.filter(({ recFood, curFood }) => foodInRange(recFood, curFood)),
+);
+
+// 8. this one is better made with Object.groupBy also, but reduce is OK too
+console.log(
+  dogs.reduce(
+    (dogGroups, currDog) => {
+      if (currDog.curFood > currDog.recFood * 1.1) {
+        dogGroups['too-much'].push(currDog);
+      } else if (currDog.curFood < currDog.recFood * 0.9) {
+        dogGroups['too-little'].push(currDog);
+      } else {
+        dogGroups['exact'].push(currDog);
+      }
+      return dogGroups;
+    },
+    { exact: [], 'too-much': [], 'too-little': [] },
+  ),
+);
+
+// 9.
+console.log(
+  'Grouped by number of owners:',
+  Object.groupBy(dogs, ({ owners }) => owners.length),
+);
+
+// 10.
+console.log(dogs.toSorted(({ recFood: a }, { recFood: b }) => a - b));
