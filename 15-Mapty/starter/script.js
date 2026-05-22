@@ -3,14 +3,6 @@
 // prettier-ignore
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-const form = document.querySelector('.form');
-const containerWorkouts = document.querySelector('.workouts');
-const inputType = document.querySelector('.form__input--type');
-const inputDistance = document.querySelector('.form__input--distance');
-const inputDuration = document.querySelector('.form__input--duration');
-const inputCadence = document.querySelector('.form__input--cadence');
-const inputElevation = document.querySelector('.form__input--elevation');
-
 class Workout {
   #date = new Date();
   #id = (Date.now() + '').slice(-10) + Math.floor(Math.random() * 1000);
@@ -47,12 +39,17 @@ class Cycling extends Workout {
   }
 }
 
-const run1 = new Running([39, 12], 5, 36, 178);
-const cycling1 = new Cycling([39, 12], 5, 12, 564);
-console.log(run1, cycling1);
+const form = document.querySelector('.form');
+const containerWorkouts = document.querySelector('.workouts');
+const inputType = document.querySelector('.form__input--type');
+const inputDistance = document.querySelector('.form__input--distance');
+const inputDuration = document.querySelector('.form__input--duration');
+const inputCadence = document.querySelector('.form__input--cadence');
+const inputElevation = document.querySelector('.form__input--elevation');
 class App {
   #map;
   #mapEvent;
+  #workouts;
 
   constructor() {
     this._getPosition();
@@ -101,12 +98,22 @@ class App {
 
   _newWorkout(e) {
     e.preventDefault();
-    inputCadence.value =
-      inputDistance.value =
-      inputDuration.value =
-      inputElevation.value =
-        '';
 
+    // Get the inputs from form
+    const type = inputType.value;
+    const distance = inputDistance.value;
+    const cadence = inputCadence.value;
+
+    // Validate the inputs
+    
+
+    // If running, create Running obj
+
+    // If cyclin — Cycling
+
+    // Store the obj in an array
+
+    // Render the obj on the map
     const { lat, lng } = this.#mapEvent.latlng;
 
     L.marker([lat, lng])
@@ -120,6 +127,12 @@ class App {
       )
       .setPopupContent('Hello!')
       .openPopup();
+
+    inputCadence.value =
+      inputDistance.value =
+      inputDuration.value =
+      inputElevation.value =
+        '';
   }
 }
 
