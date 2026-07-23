@@ -56,6 +56,7 @@ function getCountryData(country) {
 }
 
 function renderCountry(data) {
+  console.log('Data received:', data);
   const html = `
     <article class="country">
         <img class="country__img" src="${data.flag.url_svg}"/>
@@ -90,7 +91,7 @@ function getCountryAndNeighbour(country) {
     });
     request.open(
       'GET',
-      `https://api.restcountries.com/countries/v5/codes.alpha_2/${neighbour}`,
+      `https://api.restcountries.com/countries/v5/codes.alpha_3/${neighbour}`,
     );
     request.setRequestHeader(
       'Authorization',
